@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asesmen Diagnostik - Sanggar Seni</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+    body { font-family: 'Poppins', sans-serif; background-color: #0a192f; color: #f8fafc; }
+    .btn-gold { background-color: #d4af37; color: #0a192f; }
+    .btn-gold:hover { background-color: #b5952f; }
+    .card-bg { background-color: #153e75; }
+    .fade-in { animation: fadeIn 0.5s ease-in; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+  <!-- HALAMAN PEMBUKA -->
+  <div id="screen-splash" class="w-full max-w-4xl text-center fade-in">
+    <h1 class="text-4xl md:text-5xl font-bold text-[#d4af37] mb-2">ASESMEN DIAGNOSTIK</h1>
+    <h2 class="text-2xl md:text-3xl font-semibold mb-2">PENGELOMPOKKAN MINAT</h2>
+    <p class="text-lg text-slate-300 mb-8">Sanggar Seni Sipakatau, Sipakainge, Sipakalebbi</p>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="card-bg p-4 rounded-xl shadow-lg border border-[#800020]">🎭<br>TEATER</div>
+      <div class="card-bg p-4 rounded-xl shadow-lg border border-[#10b981]">💃<br>TARI</div>
+      <div class="card-bg p-4 rounded-xl shadow-lg border border-[#3b82f6]">🎵<br>MUSIK</div>
+      <div class="card-bg p-4 rounded-xl shadow-lg border border-[#d4af37]">🎨<br>SENI RUPA</div>
+    </div>
+    
+    <p class="text-md mb-6 italic">“Kenali minatmu, temukan potensi kreatifmu, dan jadilah bagian dari dunia seni!”</p>
+    <button onclick="showScreen('screen-identity')" class="btn-gold font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105">MULAI ASESMEN</button>
+  </div>
+
+  <!-- HALAMAN IDENTITAS -->
+  <div id="screen-identity" class="w-full max-w-md hidden fade-in">
+    <div class="card-bg p-8 rounded-2xl shadow-2xl">
+      <h2 class="text-2xl font-bold mb-6 text-center text-[#d4af37]">Identitas Diri</h2>
+      <div class="mb-4">
+        <label class="block mb-2">Nama Lengkap</label>
+        <input type="text" id="input-nama" class="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-600 focus:border-[#d4af37] outline-none">
+      </div>
+      <div class="mb-6">
+        <label class="block mb-2">Kelas / Kelompok</label>
+        <input type="text" id="input-kelas" class="w-full p-3 rounded-lg bg-slate-800 text-white border border-slate-600 focus:border-[#d4af37] outline-none">
+      </div>
+      <button onclick="startQuiz()" class="btn-gold w-full font-bold py-3 rounded-xl transition">LANJUTKAN KE ASESMEN</button>
+    </div>
+  </div>
+
+  <!-- HALAMAN SOAL -->
+  <div id="screen-quiz" class="w-full max-w-2xl hidden fade-in">
+    <div class="card-bg p-6 md:p-8 rounded-2xl shadow-2xl">
+      <div class="flex justify-between items-center mb-4">
+        <span id="quiz-progress-text" class="text-sm font-semibold text-slate-300">Soal 1 dari 15</span>
+      </div>
+      <div class="w-full bg-slate-700 h-2 rounded-full mb-6">
+        <div id="quiz-progress-bar" class="bg-[#d4af37] h-2 rounded-full" style="width: 6.66%"></div>
+      </div>
+      
+      <h3 id="quiz-question" class="text-xl font-semibold mb-6">Pertanyaan...</h3>
+      <div id="quiz-options" class="space-y-3 mb-6">
+        <!-- Pilihan jawaban di-render via JS -->
+      </div>
+      
+      <div class="flex justify-between">
+        <button id="btn-prev" onclick="prevQuestion()" class="bg-slate-700 hover:bg-slate-600 text-white py-2 px-6 rounded-lg hidden">Sebelumnya</button>
+        <button id="btn-next" onclick="nextQuestion()" class="btn-gold py-2 px-6 rounded-lg ml-auto">Berikutnya</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL -->
+  <div id="screen-result" class="w-full max-w-2xl hidden fade-in text-center">
+    <div class="card-bg p-8 rounded-2xl shadow-2xl">
+      <h2 class="text-3xl font-bold text-[#d4af37] mb-4">Selesai!</h2>
+      <p id="result-message" class="text-lg mb-6">Selamat, [Nama]! Kamu telah menyelesaikan asesmen diagnostik.</p>
+      
+      <div class="bg-slate-800 p-6 rounded-xl border border-slate-600 mb-6">
+        <h3 class="text-xl font-semibold text-slate-300 mb-2">Kecenderungan Minat Dominan:</h3>
+        <p id="result-dominant" class="text-3xl font-bold text-[#10b981] mb-2">TEATER</p>
+        <p class="text-sm text-slate-400">Hasil ini merupakan pemetaan awal minat, bukan penetapan kemampuan mutlak.</p>
+      </div>
+      
+      <p class="text-sm text-slate-400 mb-6">Data telah tersimpan di sistem guru.</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { dataSoal } from './soal.js';
+
+    // 1. CONFIG FIREBASE ANDA DI SINI
+    const firebaseConfig = {
+      apiKey: "API_KEY",
+      authDomain: "DOMAIN",
+      projectId: "PROJECT_ID",
+      storageBucket: "BUCKET",
+      messagingSenderId: "SENDER",
+      appId: "APP_ID"
+    };
+    
+    const app = window.firebaseApp = initializeApp(firebaseConfig);
+    const db = window.firebaseDb = getFirestore(app);
+
+    // STATE
+    let currentQ = 0;
+    let answers = {};
+    let studentData = {};
+
+    // NAVIGATION
+    window.showScreen = (id) => {
+      document.querySelectorAll('body > div').forEach(el => el.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+    };
+
+    window.startQuiz = () => {
+      const nama = document.getElementById('input-nama').value.trim();
+      const kelas = document.getElementById('input-kelas').value.trim();
+      if(!nama) return alert("Nama wajib diisi!");
+      studentData = { nama, kelas };
+      renderQuestion();
+      showScreen('screen-quiz');
+    };
+
+    const renderQuestion = () => {
+      const q = dataSoal[currentQ];
+      document.getElementById('quiz-progress-text').innerText = `Soal ${currentQ + 1} dari 15`;
+      document.getElementById('quiz-progress-bar').style.width = `${((currentQ + 1) / 15) * 100}%`;
+      document.getElementById('quiz-question').innerText = `${q.no}. ${q.pertanyaan}`;
+      
+      const optionsContainer = document.getElementById('quiz-options');
+      optionsContainer.innerHTML = '';
+      
+      q.pilihan.forEach((opt, idx) => {
+        const isSelected = answers[currentQ] === opt.poin;
+        const btn = document.createElement('button');
+        btn.className = `w-full text-left p-4 rounded-xl border transition ${isSelected ? 'border-[#d4af37] bg-[#d4af37] text-[#0a192f]' : 'border-slate-600 hover:border-slate-400'}`;
+        btn.innerText = opt.teks;
+        btn.onclick = () => { answers[currentQ] = opt.poin; renderQuestion(); };
+        optionsContainer.appendChild(btn);
+      });
+
+      document.getElementById('btn-prev').classList.toggle('hidden', currentQ === 0);
+      document.getElementById('btn-next').innerText = currentQ === 14 ? 'KIRIM JAWABAN' : 'Berikutnya';
+    };
+
+    window.prevQuestion = () => { if(currentQ > 0) { currentQ--; renderQuestion(); } };
+    window.nextQuestion = async () => {
+      if(!answers[currentQ]) return alert("Silakan pilih jawaban terlebih dahulu!");
+      
+      if(currentQ < 14) {
+        currentQ++; renderQuestion();
+      } else {
+        await submitAnswers();
+      }
+    };
+
+    const submitAnswers = async () => {
+      document.getElementById('btn-next').innerText = 'Mengirim...';
+      document.getElementById('btn-next').disabled = true;
+
+      // Hitung Skor[cite: 1]
+      let scores = { T: 0, TR: 0, M: 0, R: 0 };
+      Object.values(answers).forEach(val => { scores[val]++; });
+      
+      let maxScore = Math.max(...Object.values(scores));
+      let dominants = Object.keys(scores).filter(k => scores[k] === maxScore);
+      
+      const mapping = { T: "Teater", TR: "Tari", M: "Musik", R: "Seni Rupa" };
+      let dominanText = dominants.map(k => mapping[k]).join(" & ");
+      if(dominants.length > 1) dominanText += " (Campuran)";
+
+      try {
+        await addDoc(collection(db, "hasil_asesmen"), {
+          nama: studentData.nama,
+          kelas: studentData.kelas,
+          skor: scores,
+          dominan: dominanText,
+          waktu: serverTimestamp(),
+          jawaban_mentah: answers
+        });
+        
+        document.getElementById('result-message').innerText = `Selamat, ${studentData.nama}! Kamu telah menyelesaikan asesmen diagnostik. Hasil ini menjadi langkah awal untuk mengenali minat dan mengeksplorasi potensi senimu.`;
+        document.getElementById('result-dominant').innerText = dominanText;
+        showScreen('screen-result');
+      } catch (e) {
+        alert("Gagal mengirim data. Periksa koneksi internet Anda.");
+        document.getElementById('btn-next').innerText = 'KIRIM JAWABAN';
+        document.getElementById('btn-next').disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>
